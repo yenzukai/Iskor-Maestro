@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Iskor Maestro - Competition Scoring System</title>
+  <link rel="icon" type="image/x-icon" href=".logo/Iskor-Maestro-Logo.png">
+  <link rel="stylesheet" href="istilo.css">
+</head>
+<body>
+
+<header>
+  <div class="header-text">
+    <h1>ISK<img src=".logo/Iskor-Maestro-Logo.png" class="logo-icon">R MAESTRO</h1>
+    <p>Scoring Competition System</p>
+  </div>
+  <div class="header-actions">
+    <div class="autosave-wrap" title="Autosave status">
+      <div class="autosave-dot" id="autosaveDot"></div>
+      <span class="autosave-label" id="autosaveLabel">—</span>
+    </div>
+    <button class="btn btn-secondary btn-sm" onclick="openFileModal()" title="Open saved session file"><img src=".icon/open-file-folder-svgrepo-com.svg" class="svg-icon"> Open</button>
+    <button class="btn btn-secondary btn-sm" onclick="saveToFile()" title="Save session to file"><img src=".icon/diskette-save-svgrepo-com.svg" class="svg-icon"> Save</button>
+    <button class="btn btn-secondary btn-sm" onclick="printScoresheets()" title="Print blank judge scoresheets"><img src=".icon/sheets-sheet-svgrepo-com.svg" class="svg-icon"> Scoresheets</button>
+    <button class="btn btn-secondary btn-sm" onclick="printResults()"><img src=".icon/printer-svgrepo-com.svg" class="svg-icon"> Results</button>
+  </div>
+</header>
+
+<!-- Recovery Banner (shown if autosave data found on load) -->
+<div id="recoveryBanner" class="recovery-banner" style="display:none;">
+  <div class="rb-icon"><img src=".icon/diskette-save-svgrepo-com.svg" class="svg-icon"></div>
+  <div class="rb-text">
+    <strong>Unsaved session found.</strong> You have autosaved progress from <span id="recoveryTime">a previous session</span>.
+  </div>
+  <div class="rb-actions">
+    <button class="btn btn-warn btn-sm" onclick="restoreAutosave()">↩ Restore</button>
+    <button class="btn btn-danger btn-sm" onclick="dismissRecovery()">✕ Discard</button>
+  </div>
+</div>
+
+<nav class="nav-tabs">
+  <button class="tab-btn active" onclick="showTab('setup')"><img src=".icon/gear-svgrepo-com.svg" class="svg-icon"> Setup</button>
+  <button class="tab-btn" onclick="showTab('groups')"><img src=".icon/person-svgrepo-com.svg" class="svg-icon"> Contestant</button>
+  <button class="tab-btn" onclick="showTab('scoring')"><img src=".icon/bar-graph-svgrepo-com.svg" class="svg-icon"> Scoring</button>
+  <button class="tab-btn" onclick="showTab('results')"><img src=".icon/trophy-svgrepo-com.svg" class="svg-icon"> Results</button>
+</nav>
+
+<main>
+
+  <!-- ===== SETUP PANEL ===== -->
+  <div id="panelSetup" class="panel active">
+
+    <!-- Event Info -->
+    <div class="card">
+      <div class="card-title">Event Information</div>
+      <div class="row row-2">
+        <div class="form-group">
+          <label>Event Name</label>
+          <input type="text" id="eventName" placeholder="Event name">
+        </div>
+        <div class="form-group">
+          <label>Event Date</label>
+          <input type="date" id="eventDate">
+        </div>
+      </div>
+      <div class="row row-2">
+        <div class="form-group">
+          <label>Venue</label>
+          <input type="text" id="eventVenue" placeholder="Venue name">
+        </div>
+        <div class="form-group">
+          <label>Number of Judges</label>
+          <select id="numJudges" onchange="updateJudgeNames()">
+            <option value="1">1 Judge</option>
+            <option value="2">2 Judges</option>
+            <option value="3">3 Judges</option>
+            <option value="4">4 Judges</option>
+            <option value="5">5 Judges</option>
+            <option value="6">6 Judges</option>
+          </select>
+        </div>
+      </div>
+      <div id="judgeNamesContainer" class="mt-8"></div>
+    </div>
+
+    <!-- Competition Type -->
+    <div class="card">
+      <div class="card-title">Competition Type</div>
+      <div class="text-dim" style="margin-bottom:12px;">Select the format of this competition.</div>
+      <div class="row row-2">
+        <div class="form-group">
+          <label>Competition Format</label>
+          <select id="competitionType" onchange="onCompetitionTypeChange()">
+            <option value="solo">Solo (Dance, Singing, Talent)</option>
+            <option value="group">Group (Dance, Singing, Talent)</option>
+            <option value="pageant">Pageant (Multi-stage)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Scoring Method</label>
+          <select id="scoringMethod">
+            <option value="direct">Points (Recommended)</span></option>
+            <option value="percent">Percentages</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pageant Stages (shown only for pageant type) -->
+    <div class="card" id="pageantStagesSection" style="display:none;">
+      <div class="card-title">Pageant Segments</div>
+      <div class="text-dim" style="margin-bottom:12px;">Define each segments, its weight %, and sub-criteria. Sub-criteria <strong>must total 100%</strong> per segment. Enable <em>Back-to-zero</em> to score that segment independently.</div>
+      <div id="pageantStagesList"></div>
+      <div class="weight-total bad" id="pageantWeightTotal">Total: 0%</div>
+      <div class="flex-gap mt-12">
+        <button class="btn btn-secondary btn-sm" onclick="addPageantStage()">+ Add Segment</button>
+      </div>
+
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+        <div class="card-title" style="font-size:0.85rem;margin-bottom:8px;">Elimination System</div>
+        <div class="text-dim" style="margin-bottom:10px;font-size:0.78rem;">
+          Define elimination cuts after each segment. Only the top-N candidates by cumulative score advance to the next segment.
+          Ties at the cutoff are included. Set count higher than your total candidates to effectively skip a cut.
+        </div>
+        <div id="progressiveCutsContainer"></div>
+        <div class="flex-gap mt-8">
+          <button class="btn btn-secondary btn-sm" onclick="addCut()">+ Add Cut</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Criteria -->
+    <div class="card" id="criteriaCard">
+      <div class="card-title">Criteria of Judging</div>
+      <div class="text-dim" style="margin-bottom:12px;">Customize criteria names and weights. Total must equal to 100%.</div>
+      <div class="criteria-list" id="criteriaList"></div>
+      <div class="weight-total" id="weightTotal">Total: 0%</div>
+      <div class="flex-gap mt-12">
+        <button class="btn btn-secondary btn-sm" onclick="addCriteria()">+ Add Criteria</button>
+        <button class="btn btn-secondary btn-sm" onclick="resetCriteria()">↺ Reset Default</button>
+      </div>
+    </div>
+
+    <!-- Rules -->
+    <div class="card">
+      <div class="card-title">Competition Rules</div>
+      <div class="text-dim" style="margin-bottom:12px;">
+        Define rules for this competition. Use the <strong>Affects Score</strong> toggle to make a rule deduct points on violation,
+        and the <strong>Enabled</strong> toggle to activate or suspend a rule without deleting it.
+        Mark per-candidate violations from the Candidate tab using the <strong><img src=".icon/warning-svgrepo-com.svg" class="text-icon"></strong> button.
+      </div>
+      <div id="rulesList"></div>
+      <div class="flex-gap mt-12">
+        <button class="btn btn-secondary btn-sm" onclick="addRule()">+ Add Rule</button>
+      </div>
+      <div style="margin-top:16px;">
+        <button class="btn btn-primary btn-full" onclick="saveSetupAndGo()">Save Setup & Continue →</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== GROUPS PANEL ===== -->
+  <div id="panelGroups" class="panel">
+
+    <div class="card">
+      <div class="card-title">Add Competing Contestant</div>
+      <div class="row row-2">
+        <div class="form-group">
+          <label id="groupOrSoloLabel">Group / Team Name</label>
+          <input type="text" id="newGroupName" placeholder="e.g., Zumba Diva's">
+        </div>
+        <div class="form-group">
+          <label id="zoneFieldLabel">Address / Representing</label>
+          <input type="text" id="newGroupZone" placeholder="e.g., Manila, Philippines">
+        </div>
+      </div>
+      <div class="row row-2" id="membersRow">
+        <div class="form-group">
+          <label>Number of Members</label>
+          <input type="number" id="newGroupMembers" min="5" max="15" placeholder="5-15" value="">
+        </div>
+        <div class="form-group">
+          <label>Performance Order #</label>
+          <input type="number" id="newGroupOrder" min="1" placeholder="Auto">
+        </div>
+      </div>
+      <div class="row row-2" id="orderRowSolo" style="display:none;">
+        <div class="form-group">
+          <label>Performance Order #</label>
+          <input type="number" id="newGroupOrderSolo" min="1" placeholder="Auto" oninput="document.getElementById('newGroupOrder').value=this.value">
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="addGroup()">+ Add Contestant</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title flex-between">
+        <span>Registered Contestants</span>
+        <span id="groupCount" class="badge badge-pending">0 contestants</span>
+      </div>
+      <div id="groupsList" class="groups-list">
+        <div class="empty-state">
+          <img src=".icon/person-svgrepo-com.svg" class="icon">
+          <p>No contestants yet.<br>Add competing contestants above.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== SCORING PANEL ===== -->
+  <div id="panelScoring" class="panel">
+
+    <div id="scoringContent">
+      <div class="empty-state" style="padding:60px 20px;">
+        <img src=".icon/bar-graph-svgrepo-com.svg" class="icon">
+        <p>Add contestants first to start scoring.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== RESULTS PANEL ===== -->
+  <div id="panelResults" class="panel">
+
+    <div class="print-header">
+      <div style="font-size:1.4rem;font-weight:700;" id="printEventName">Competition Results</div>
+      <div style="font-size:0.85rem;color:#555;margin-top:4px;" id="printEventDetails"></div>
+    </div>
+
+    <div id="resultsContent">
+      <div class="empty-state" style="padding:60px 20px;">
+        <img src=".icon/trophy-svgrepo-com.svg" class="icon">
+        <p>No results yet.<br>Score all contestants to see the rankings.</p>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<!-- ===== SCORING MODAL ===== -->
+<div id="scoringModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Score Contestant</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- ===== FILE OPEN MODAL ===== -->
+<div id="fileModal" class="file-modal-overlay">
+  <div class="file-modal">
+    <h3><img src=".icon/open-file-folder-svgrepo-com.svg" class="svg-icon"> Open Session File</h3>
+    <p>Load a previously saved <code>.json</code> session file to restore all your contestant, scores, and settings.</p>
+    <div class="file-drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()"
+         ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+      <img src=".icon/upload-svgrepo-com.svg" class="drop-icon">
+      <p>Drop your <span>iskormaestro.json</span> file here<br>or <span>click to browse</span></p>
+    </div>
+    <input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleFileSelect(event)">
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-secondary btn-full" onclick="closeFileModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCORESHEET PRINT CONTAINER ===== -->
+<div id="scoresheetContainer"></div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+<script src="iskrip.js" defer></script>
+</body>
+</html>
