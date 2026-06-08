@@ -33,7 +33,7 @@ A browser-based scoring system built for live competitions — dance groups, sol
 No installation or build step needed.
 
 ```bash
-git clone https://github.com/your-username/iskor-maestro.git
+git clone https://github.com/yenzukai/iskor-maestro.git
 cd iskor-maestro
 ```
 
@@ -47,6 +47,9 @@ Then open `index.html` in any modern browser.
 
 ```
 iskor-maestro/
+├── .icon           # Used free icons
+├── .json           # Save files for test development
+├── .logo           # Unofficial logo
 ├── index.html      # Main app shell
 ├── iskrip.js       # All app logic (state, scoring, rendering, print)
 └── istilo.css      # Styles (dark UI + print-optimized scoresheet layouts)
