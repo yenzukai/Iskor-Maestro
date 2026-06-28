@@ -5,7 +5,7 @@ A browser-based scoring system built for live competitions — dance groups, sol
 
 ---
 
-## ✨ Features
+## Features
 
 - **Three Competition Formats** — Group, Solo, and Pageant (multi-segment)
 - **Configurable Judging Criteria** — Add, rename, and weight criteria freely; must total 100%
@@ -28,7 +28,7 @@ A browser-based scoring system built for live competitions — dance groups, sol
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 No installation or build step needed.
 
@@ -43,7 +43,7 @@ Then open `index.html` in any modern browser.
 
 ---
 
-## 📁 File Structure
+## File Structure
 
 ```
 iskor-maestro/
@@ -57,7 +57,7 @@ iskor-maestro/
 
 ---
 
-## 🖥️ Usage Guide
+## Usage Guide
 
 ### 1. Setup
 - Fill in event name, date, and venue
@@ -84,23 +84,23 @@ iskor-maestro/
 - Full score breakdown per contestant is shown
 
 ### 5. Print
-- **📋 Scoresheets** — Print blank judge scoresheets before or during the event
-- **🖨️ Results** — Print the final rankings page
+- **Scoresheets** — Print blank judge scoresheets before or during the event
+- **Results** — Print the final rankings page
 
 ---
 
-## 💾 Session Management
+## Session Management
 
 | Action | How |
 |---|---|
-| Save session | Click **💾 Save** in the header — downloads a `.json` file |
-| Load session | Click **📂 Open** in the header — drag or browse for the `.json` file |
+| Save session | Click **Save** in the header — downloads a `.json` file |
+| Load session | Click **Open** in the header — drag or browse for the `.json` file |
 | Autosave | Happens automatically; a dot indicator in the header shows status |
 | Restore | On next load, a banner appears if unsaved progress is found |
 
 ---
 
-## 🌐 Browser Compatibility
+## Browser Compatibility
 
 | Browser | Supported |
 |---|---|
@@ -111,7 +111,7 @@ iskor-maestro/
 
 ---
 
-## 📄 License
+## License
 
 MIT License — free to use, modify, and distribute.
 
